@@ -1,7 +1,16 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
-# Create your views here.
+from lib.logging.logger import log
+
 
 def abc(request):
-    return HttpResponse('Welcome to AlgoCourse! Fuck')
+    log.info("I'm heree")
+    log.error("Error heree")
+    log.data("Hehehee")
+
+    try:
+        raise Exception("WTFe?")
+    except:
+        log.exception("Whate?|from=%s,to=%s", "aasdasd", 1111)
+    return HttpResponse('Welcome to AlgoCourse!e')

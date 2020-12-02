@@ -136,3 +136,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
 }
+
+LOG_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+LOG_DIR = os.path.join(LOG_BASE_DIR, 'log')
+
+LOGGING_CONFIG = None
