@@ -1,6 +1,5 @@
-from django.shortcuts import render
+# from django.shortcuts import render
 from django.http import HttpResponse
-
 from lib.logging.logger import log
 
 
@@ -11,6 +10,6 @@ def abc(request):
 
     try:
         raise Exception("WTFe?")
-    except:
+    except Exception:
         log.exception("Whate?|from=%s,to=%s", "aasdasd", 1111)
     return HttpResponse('Welcome to AlgoCourse!e')
