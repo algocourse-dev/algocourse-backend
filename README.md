@@ -91,3 +91,32 @@ docker-compose exec web python manage.py collectstatic
 ```
 
 ### Feel free to develop from here `https://docs.djangoproject.com/en/3.1/`.
+
+#### Update 26/12/2020:
+Added pre-commit with pre-commit-hooks, isort, black and flake8.
+
+When committing, there would be a number of jobs trying to lint the files. The commit will stop when there is at least one error while linting.
+
+```isort``` is for sorting your imports (https://github.com/pycqa/isort).
+
+```black``` is for formatting your code (https://github.com/psf/black).
+
+```flake8``` is for linting your code (https://gitlab.com/pycqa/flake8).
+
+You can run them independently with these commands:
+```
+isort .
+black .
+flake8 .
+```
+
+```isort``` and ```black``` will modify your files, you can use flag ```--diff``` to see how they change your files.
+
+Configuration files:
+
+```
+isort: .isort.cfg
+black: pyproject.toml
+flake8: .flake8
+pre-commit: pre-commit-config.yaml
+```
