@@ -23,9 +23,9 @@ jobs:
       - name: Lint with flake8
         run: |
           flake8 . --count --config=.flake8 --show-source --statistics
-#      - name: Test with pytest
-#        run: |
-#          pytest
+      - name: Test with pytest
+        run: |
+          pytest
   login:
     needs: build
     runs-on: ubuntu-latest
