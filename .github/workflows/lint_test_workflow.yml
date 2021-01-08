@@ -3,10 +3,10 @@ name: Lint and test workflow
 on: [push]
 
 jobs:
-  build:
+  test:
+    runs-on: ubuntu-latest
     container:
       image: algocourse/backend:latest
-
     steps:
       - name: Install dependencies
         run: pip install -r ./app/requirements.txt
