@@ -3,17 +3,23 @@ name: Lint and test workflow
 on: [push]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     container:
       image: algocourse/backend:latest
     steps:
+      - name: Checkout my code
+        uses: actions/checkout@v2
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f ./app/requirements.txt ]; then pip install -r ./app/requirements.txt; fi
       - name: Lint with flake8
-        run: flake8 . --count --config=.flake8 --show-source --statistics
+        run: |
+          flake8 . --count --config=.flake8 --show-source --statistics
       - name: Test with pytest
-        run: pytest
+        run: |
+          pytest
 #  push-to-docker-hub:
 #    needs: build
 #    runs-on: ubuntu-latest
