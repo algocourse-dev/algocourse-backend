@@ -8,7 +8,7 @@ jobs:
     container:
       image: algocourse/backend:latest
     steps:
-      - name: Checkout my code
+      - name: Checkout
         uses: actions/checkout@v2
       - name: Install dependencies
         run: |
