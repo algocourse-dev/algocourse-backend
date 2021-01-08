@@ -9,7 +9,7 @@ jobs:
       image: algocourse/backend:latest
     steps:
       - name: Install dependencies
-        run: pip install -r ./app/requirements.txt
+        run: pip install -r requirements.txt
       - name: Lint with flake8
         run: flake8 . --count --config=.flake8 --show-source --statistics
       - name: Test with pytest
