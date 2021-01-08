@@ -3,3 +3,5 @@ env/
 .vscode/
 db/*
 app/log/
+*.pyc
+.pytest_cache/
