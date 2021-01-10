@@ -1,4 +1,4 @@
-name: Test, build and push workflow
+name: Test, build and push
 
 on: [push]
 
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Extract branch name
-        shell: /bin/bash
+        shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
       - name: Checkout
