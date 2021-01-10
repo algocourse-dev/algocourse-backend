@@ -22,7 +22,7 @@ jobs:
           pytest
 
   build-and-push:
-    if: github.event.action == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main')
+    if: github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main'
     needs: test
     runs-on: ubuntu-latest
     steps:
