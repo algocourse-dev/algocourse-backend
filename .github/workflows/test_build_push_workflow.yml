@@ -6,7 +6,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container:
-      image: algocourse/backend:latest
+      image: algocourse/backend:py3.8
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -21,11 +21,15 @@ jobs:
         run: |
           pytest
 
-  build-and-push-to-docker-hub:
-    if: github.ref == 'refs/heads/main'
+  build-and-push:
+    if: github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main'
     needs: test
     runs-on: ubuntu-latest
     steps:
+      - name: Extract branch name
+        shell: /bin/bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
       - name: Checkout
         uses: actions/checkout@v2
       - name: Set up Docker Buildx
@@ -43,6 +47,6 @@ jobs:
           context: ./app
           file: ./app/Dockerfile
           push: true
-          tags: algocourse/backend:latest
+          tags: algocourse/backend-${{ steps.extract_branch.outputs.branch }}:latest
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
