@@ -8,10 +8,6 @@ jobs:
     container:
       image: algocourse/backend:py3.8
     steps:
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
       - name: Checkout
         uses: actions/checkout@v2
       - name: Install dependencies
