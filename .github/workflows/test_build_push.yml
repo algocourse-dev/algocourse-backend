@@ -75,6 +75,10 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Generate image tag id
+        shell: bash
+        run: echo "::set-output name=tag_id::$(git rev-parse --short "$GITHUB_SHA")"
+        id: generate_tag_id
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
@@ -83,7 +87,7 @@ jobs:
           context: ./app
           file: ./app/Dockerfile
           push: true
-          tags: algocourse/backend-${{ steps.extract_branch.outputs.branch }}:build-${{ github.run_id }}
+          tags: algocourse/backend-${{ steps.extract_branch.outputs.branch }}:build-${{ steps.generate_tag_id.outputs.tag_id }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
       - name: Image digest
