@@ -3,7 +3,7 @@ name: Test, build and push
 on: [push]
 
 jobs:
-  test:
+  unit-test:
     runs-on: ubuntu-latest
     container:
       image: algocourse/backend:py3.8
@@ -22,7 +22,7 @@ jobs:
           pytest
 
   docker-test:
-    needs: test
+    needs: unit-test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -83,7 +83,7 @@ jobs:
           context: ./app
           file: ./app/Dockerfile
           push: true
-          tags: algocourse/backend-${{ steps.extract_branch.outputs.branch }}:latest
+          tags: algocourse/backend-${{ steps.extract_branch.outputs.branch }}:build-${{ github.run_id }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
       - name: Image digest
