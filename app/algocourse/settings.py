@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'test_structure',
+    'social_django',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'algocourse.urls'
@@ -63,6 +65,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -138,3 +142,73 @@ LOG_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 LOG_DIR = os.path.join(LOG_BASE_DIR, 'log')
 
 LOGGING_CONFIG = None
+
+# Social Auth Settings
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.github.GithubOAuth2',
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.facebook.FacebookOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+# from social_core.pipeline
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)
+
+# When using PostgreSQL, it’s recommended to use the built-in
+# JSONB field to store the extracted extra_data.
+SOCIAL_AUTH_POSTGRES_JSONFIELD = True
+
+# Used to redirect the user once the auth process ended successfully.
+# The value of ?next=/foo is used if it was present
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_URL = 'logout'
+LOGOUT_REDIRECT_URL = 'login'
+
+# Facebook OAuth Settings
+SOCIAL_AUTH_FACEBOOK_KEY = '727257444625631'
+SOCIAL_AUTH_FACEBOOK_SECRET = '8a65a6fb19a3cab2bcfacf6893cdb17c'
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email', 'user_link', 'public_profile']
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {'fields': 'id, name, email, picture.type(large), link'}
+SOCIAL_AUTH_FACEBOOK_EXTRA_DATA = [
+    ('name', 'name'),
+    ('email', 'email'),
+    ('picture', 'picture'),
+    ('link', 'profile_url'),
+]
+
+# Google OAuth Settings
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '108271941459-0dmmdbvekn4apksm1uc3khog47u0fk2j.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'Ekz63FTk0KSVmiAwTHqiz-uR'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+    'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid',
+]
+SOCIAL_AUTH_GOOGLE_OAUTH2_PROFILE_EXTRA_PARAMS = {'fields': 'name, email, picture, sub'}
+SOCIAL_AUTH_GOOGLE_OAUTH2_EXTRA_DATA = [
+    ('name', 'name'),
+    ('email', 'email'),
+    ('picture', 'picture'),
+    ('sub', 'sub'),
+]
+
+# GitHub OAuth Settings
+SOCIAL_AUTH_GITHUB_KEY = 'd9fb701124c3df565700'
+SOCIAL_AUTH_GITHUB_SECRET = 'bc16e0b67306f9d310cf928083166875aabf82c1'
+SOCIAL_AUTH_GITHUB_SCOPE = ['user:email']
+SOCIAL_AUTH_GITHUB_PROFILE_EXTRA_PARAMS = {'fields': 'id, login, html_url, avatar_url, email'}
+SOCIAL_AUTH_GITHUB_EXTRA_DATA = [
+    ('login', 'name'),
+    ('email', 'email'),
+    ('avatar_url', 'picture'),
+    ('html_url', 'profile_url'),
+]
