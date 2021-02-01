@@ -5,6 +5,6 @@ include = '\.pyi?$'
 exclude = '''
 (
   env/
-  | app/lib/logging
+  | lib/logging
 )
 '''

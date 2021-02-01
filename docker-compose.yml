@@ -2,19 +2,19 @@ version: '3.8'
 
 services:
   web:
-    build: ./app
+    build: ./
     image: algocourse_web
     command: gunicorn algocourse.wsgi:application --bind 0.0.0.0:8000 --reload
     volumes:
       # set volume to be the "app" directory and set reload flag in gunicorn
       # to make the changes to be applied automatically in the web container
-      - ./app/:/usr/src/app/
+      - ./:/usr/src/app/
     expose:
       # run gunicorn at port 8000 of the container and expose this port
       # so that nginx can see and set upstream at web:8000
       - 8000
     env_file:
-      - ./.env.dev
+      - ./config/.env.dev
     depends_on:
       # wait for db and redis to finish their initialization
       - db
@@ -32,15 +32,15 @@ services:
   adminer:
     image: adminer:4.7.7
     ports:
-      - 8080:8080
+      - 9090:8080
     depends_on:
       - db
   nginx:
     build: ./nginx
     image: algocourse_nginx
     volumes:
-      - ./app/staticfiles/:/home/app/web/staticfiles/
-      - ./app/mediafiles/:/home/app/web/mediafiles/
+      - ./staticfiles/:/home/app/web/staticfiles/
+      - ./mediafiles/:/home/app/web/mediafiles/
     ports:
       # start nginx at port 80 in its container and connect it with port 1337 of the real device
       - 1337:80

@@ -3,30 +3,30 @@ repos:
     rev: v3.2.0
     hooks:
     -   id: trailing-whitespace
-        exclude: ^(app/lib/logging/)|(app/staticfiles/admin/)
+        exclude: ^(lib/logging/)|(staticfiles/admin/)
     -   id: end-of-file-fixer
-        exclude: ^(app/lib/logging/)|(app/staticfiles/admin/)
+        exclude: ^(lib/logging/)|(staticfiles/admin/)
     -   id: check-yaml
-        exclude: ^(app/lib/logging/)|(app/staticfiles/admin/)
+        exclude: ^(lib/logging/)|(staticfiles/admin/)
     -   id: check-added-large-files
-        exclude: ^(app/lib/logging/)|(app/staticfiles/admin/)
+        exclude: ^(lib/logging/)|(staticfiles/admin/)
 
 -   repo: https://github.com/pycqa/isort
     rev: 5.6.4
     hooks:
     -   id: isort
-        exclude: ^(app/lib/logging/)|(app/staticfiles/admin/)
+        exclude: ^(lib/logging/)|(staticfiles/admin/)
 
 -   repo: https://github.com/psf/black
     rev: 20.8b1
     hooks:
     -   id: black
         language_version: python3
-        exclude: ^(app/lib/logging/)|(app/staticfiles/admin/)
+        exclude: ^(lib/logging/)|(staticfiles/admin/)
 
 -   repo: https://gitlab.com/pycqa/flake8
     rev: 3.8.4
     hooks:
     -   id: flake8
         args: ['--config=.flake8']
-        exclude: ^(app/lib/logging/)|(app/staticfiles/admin/)
+        exclude: ^(lib/logging/)|(staticfiles/admin/)
