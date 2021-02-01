@@ -15,7 +15,7 @@ source env/bin/activate
 
 Install required packages:
 ```
-pip install -r app/requirements.txt
+pip install -r requirements.txt
 ```
 
 To deactivate virtual environment:
@@ -43,7 +43,7 @@ Please make sure that these ports are free:
 
 To modify port numbers, please refer to `docker-compose.yml`
 
-cd to the root directory (parent of `app`)
+cd to the root directory
 ```
 docker-compose up -d --build
 ```
