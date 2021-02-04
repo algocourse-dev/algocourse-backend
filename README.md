@@ -15,7 +15,7 @@ source env/bin/activate
 
 Install required packages:
 ```
-pip install -r app/requirements.txt
+pip install -r requirements.txt
 ```
 
 To deactivate virtual environment:
@@ -38,12 +38,12 @@ mkdir db
 
 Please make sure that these ports are free:
 1. 1337 (nginx runs here)
-2. 8080 (adminer runs here)
+2. 9090 (adminer runs here)
 3. 6380 (redis runs here)
 
 To modify port numbers, please refer to `docker-compose.yml`
 
-cd to the root directory (parent of `app`)
+cd to the root directory
 ```
 docker-compose up -d --build
 ```
