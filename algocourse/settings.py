@@ -36,8 +36,38 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'rest_framework',
+    'knox',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.github',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
 ]
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+    # `allauth` specific authentication methods, such as login by e-mail
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+SOCIALACCOUNT_PROVIDERS = {
+    'facebook': {
+        'SCOPE': ['email', 'user_link', 'public_profile'],
+        'FIELDS': ['id', 'name', 'email', 'picture.type(large)', 'link'],
+    },
+    'github': {
+        'SCOPE': ['user'],
+    },
+    'google': {
+        'SCOPE': ['profile', 'email'],
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -109,7 +139,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Singapore'
 
 USE_I18N = True
 
@@ -130,10 +160,25 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly']
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'],
 }
 
 LOG_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 LOG_DIR = os.path.join(LOG_BASE_DIR, 'log')
 
 LOGGING_CONFIG = None
+
+ACCOUNT_UNIQUE_EMAIL = False
+
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+REST_AUTH_TOKEN_MODEL = 'knox.models.AuthToken'
+REST_AUTH_TOKEN_CREATOR = 'algocourse.utils.create_knox_token'
+
+REST_AUTH_SERIALIZERS = {
+    'TOKEN_SERIALIZER': 'algocourse.serializers.KnoxSerializer',
+}
+
+SOCIALACCOUNT_QUERY_EMAIL = True
+
+USE_X_FORWARDED_HOST = True

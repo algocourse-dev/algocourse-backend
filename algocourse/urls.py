@@ -13,33 +13,39 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from allauth.socialaccount.providers.facebook import views as facebook_views
+from allauth.socialaccount.providers.github import views as github_views
+from allauth.socialaccount.providers.google import views as google_views
 from django.contrib import admin
-from django.contrib.auth.models import User
-from django.urls import include, path
-from rest_framework import routers, serializers, viewsets
+from django.urls import path
+from knox.views import LogoutView
 
+from algocourse.auth import (
+    FacebookLogin,
+    GithubLogin,
+    GoogleLogin,
+    facebook_callback,
+    get_user_info_view,
+    github_callback,
+    google_callback,
+)
 
-# Serializers define the API representation.
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ['url', 'username', 'email', 'is_staff']
-
-
-# ViewSets define the view behavior.
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-# Routers provide an easy way of automatically determining the URL conf.
-router = routers.DefaultRouter()
-router.register(r'users', UserViewSet)
-
-# Wire up our API using automatic URL routing.
-# Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(router.urls)),
-    path('api-auth/', include('rest_framework.urls')),
+    # Facebook
+    path('api/auth/facebook/url/', facebook_views.oauth2_login),
+    path('api/auth/facebook/callback/', facebook_callback, name='facebook_callback'),
+    path('api/auth/facebook/exchange/', FacebookLogin.as_view(), name='facebook_login'),
+    # GitHub
+    path('api/auth/github/url/', github_views.oauth2_login),
+    path('api/auth/github/callback/', github_callback, name='github_callback'),
+    path('api/auth/github/exchange/', GithubLogin.as_view(), name='github_login'),
+    # Google
+    path('api/auth/google/url/', google_views.oauth2_login),
+    path('api/auth/google/callback/', google_callback, name='google_callback'),
+    path('api/auth/google/exchange/', GoogleLogin.as_view(), name='google_login'),
+    # Logout
+    path('api/auth/logout/', LogoutView.as_view()),
+    # APIs
+    path('api/get_user_info/', get_user_info_view),
 ]
