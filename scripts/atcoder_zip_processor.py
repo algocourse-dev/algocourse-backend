@@ -1,13 +1,85 @@
-import hashlib
 import json
 import os
 import re
 import zipfile
 from argparse import ArgumentParser
+from typing import Union
+
+
+class CompactJSONEncoder(json.JSONEncoder):
+    """A JSON Encoder that puts small containers on single lines."""
+
+    CONTAINER_TYPES = (list, tuple, dict)
+    """Container datatypes include primitives or other containers."""
+
+    MAX_WIDTH = 70
+    """Maximum width of a container that might be put on a single line."""
+
+    MAX_ITEMS = 2
+    """Maximum number of items in container that might be put on single line."""
+
+    INDENTATION_CHAR = " "
+
+    def __init__(self, *args, **kwargs):
+        # using this class without indentation is pointless
+        if kwargs.get("indent") is None:
+            kwargs.update({"indent": 4})
+        super().__init__(*args, **kwargs)
+        self.indentation_level = 0
+
+    def encode(self, o):
+        """Encode JSON object *o* with respect to single line lists."""
+        if isinstance(o, (list, tuple)):
+            if self._put_on_single_line(o):
+                return "[" + ", ".join(self.encode(el) for el in o) + "]"
+            else:
+                self.indentation_level += 1
+                output = [self.indent_str + self.encode(el) for el in o]
+                self.indentation_level -= 1
+                return "[\n" + ",\n".join(output) + "\n" + self.indent_str + "]"
+        elif isinstance(o, dict):
+            if o:
+                if self._put_on_single_line(o):
+                    return "{" + ", ".join(f"{self.encode(k)}: {self.encode(el)}" for k, el in o.items()) + "}"
+                else:
+                    self.indentation_level += 1
+                    output = [self.indent_str + f"{json.dumps(k)}: {self.encode(v)}" for k, v in o.items()]
+                    self.indentation_level -= 1
+                    return "{\n" + ",\n".join(output) + "\n" + self.indent_str + "}"
+            else:
+                return "{}"
+        elif isinstance(o, float):  # Use scientific notation for floats, where appropiate
+            return format(o, "g")
+        elif isinstance(o, str):  # escape newlines
+            o = o.replace("\n", "\\n")
+            return f'"{o}"'
+        else:
+            return json.dumps(o)
+
+    def iterencode(self, o, **kwargs):
+        """Required to also work with `json.dump`."""
+        return self.encode(o)
+
+    def _put_on_single_line(self, o):
+        return self._primitives_only(o) and len(o) <= self.MAX_ITEMS and len(str(o)) - 2 <= self.MAX_WIDTH
+
+    def _primitives_only(self, o: Union[list, tuple, dict]):
+        if isinstance(o, (list, tuple)):
+            return not any(isinstance(el, self.CONTAINER_TYPES) for el in o)
+        elif isinstance(o, dict):
+            return not any(isinstance(el, self.CONTAINER_TYPES) for el in o.values())
+
+    @property
+    def indent_str(self) -> str:
+        return self.INDENTATION_CHAR * (self.indentation_level * self.indent)
 
 
 def natural_sort_key(s, _nsre=re.compile(r"(\d+)")):
     return [int(text) if text.isdigit() else text.lower() for text in re.split(_nsre, s)]
+
+
+def keep_line_feed_only(s):
+    return s.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
 
 
 def filter_name_list(name_list, spj=0, in_dir='', out_dir='', ext=''):
@@ -43,68 +115,61 @@ def main(arguments):
     try:
         zip_file = zipfile.ZipFile(zip_file, "r")
     except zipfile.BadZipFile:
-        print("bad zip file")
+        print("ERROR: bad zip file")
         return
 
-    name_list = zip_file.namelist()
+    name_list = sorted(zip_file.namelist())
     test_case_list = filter_name_list(name_list, spj=spj, in_dir=in_dir, out_dir=out_dir, ext=ext)
     if not test_case_list:
-        print("empty file")
+        print("ERROR: empty file")
         return
 
-    os.mkdir(test_case_dir)
+    try:
+        os.mkdir(test_case_dir)
+    except Exception:
+        print('ERROR: output dir exists ' + test_case_dir)
+        return
 
-    size_cache = {}
-    md5_cache = {}
-
-    prefix = 0
     new_test_case_list = []
     for item in test_case_list:
-        prefix += 1
-
         in_item = item[0]
-        content = zip_file.read(f"{in_item}").replace(b"\r\n", b"\n")
-        in_file_name = f"{prefix}.in"
+        in_regex = fr'^{in_dir}(.+?){ext}$'
+        m = re.search(in_regex, in_item)
+        item_name = m.group(1)
+
+        content = keep_line_feed_only(zip_file.read(f"{in_item}"))
+        in_file_name = f"{item_name}.in"
         new_test_case_list.append(in_file_name)
-        size_cache[in_file_name] = len(content)
         with open(os.path.join(test_case_dir, in_file_name), "wb") as f:
             f.write(content)
 
         if not spj:
-            out_item = item[1]
-            content = zip_file.read(f"{out_item}").replace(b"\r\n", b"\n")
-            out_file_name = f"{prefix}.out"
+            content = keep_line_feed_only(zip_file.read(f"{in_item}"))
+            out_file_name = f"{item_name}.out"
             new_test_case_list.append(out_file_name)
-            size_cache[out_file_name] = len(content)
-            md5_cache[out_file_name] = hashlib.md5(content.rstrip()).hexdigest()
             with open(os.path.join(test_case_dir, out_file_name), "wb") as f:
                 f.write(content)
 
     test_case_list = sorted(new_test_case_list, key=natural_sort_key)
-    test_case_info = {"spj": spj, "test_cases": {}}
-    info = []
+    test_case_info = {"spj": spj, "test_cases": []}
 
     if spj:
         for index, item in enumerate(test_case_list):
-            data = {"input_name": item, "input_size": size_cache[item]}
-            info.append(data)
-            test_case_info["test_cases"][str(index + 1)] = data
+            data = {"in": item}
+            test_case_info["test_cases"].append(data)
     else:
         # ["1.in", "1.out", "2.in", "2.out"] => [("1.in", "1.out"), ("2.in", "2.out")]
         test_case_list = zip(*[test_case_list[i::2] for i in range(2)])
         for index, item in enumerate(test_case_list):
             data = {
-                "stripped_output_md5": md5_cache[item[1]],
-                "input_size": size_cache[item[0]],
-                "output_size": size_cache[item[1]],
-                "input_name": item[0],
-                "output_name": item[1],
+                "in": item[0],
+                "out": item[1],
             }
-            info.append(data)
-            test_case_info["test_cases"][str(index + 1)] = data
+            test_case_info["test_cases"].append(data)
 
+    encoder = CompactJSONEncoder()
     with open(os.path.join(test_case_dir, "info"), "w", encoding="utf-8") as f:
-        f.write(json.dumps(test_case_info, indent=4))
+        f.write(encoder.encode(test_case_info))
 
     print('Done! Please check the destination directory.')
 
@@ -112,7 +177,7 @@ def main(arguments):
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('-f', type=str, dest='file', default='', help='atcoder testcase zip file')
-    parser.add_argument('-s', type=int, dest='spj', default=0, help='special judge (0 or 1)')
+    parser.add_argument('-s', type=int, dest='spj', default=0, help='need checker (0 or 1)')
     parser.add_argument('-o', type=str, dest='output', default='', help='output dir')
     args = parser.parse_args()
     main(args)
