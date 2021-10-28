@@ -168,7 +168,7 @@ def main(arguments):
             test_case_info["test_cases"].append(data)
 
     encoder = CompactJSONEncoder()
-    with open(os.path.join(test_case_dir, "info"), "w", encoding="utf-8") as f:
+    with open(os.path.join(test_case_dir, "info.json"), "w", encoding="utf-8") as f:
         f.write(encoder.encode(test_case_info))
 
     print('Done! Please check the destination directory.')
