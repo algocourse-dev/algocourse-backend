@@ -145,7 +145,8 @@ def main(arguments):
             f.write(content)
 
         if judging_mode == 'standard':
-            content = keep_line_feed_only(zip_file.read(f"{in_item}"))
+            out_item = item[1]
+            content = keep_line_feed_only(zip_file.read(f"{out_item}"))
             out_file_name = f"{item_name}.out"
             new_test_case_list.append(out_file_name)
             with open(os.path.join(test_case_dir, out_file_name), "wb") as f:
